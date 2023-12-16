@@ -52,11 +52,11 @@ class AuthController extends Controller
         return response()->json(['user' => $user, 'token' => $token]);
     }
 
-    /***
-     -------------------------------------
-    | All Users login method 
-    -------------------------------------
-    ***/
+/***
+ -------------------------------------
+| All Users login method 
+-------------------------------------
+***/
     public function login(Request $request) {
 
         $validator = Validator::make($request->all(), [
@@ -76,10 +76,5 @@ class AuthController extends Controller
 
         return response()->json(compact('token'));
     }
-
-    public function logout() {
-        
-    }
-
 
 }

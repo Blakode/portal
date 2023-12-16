@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth:api');
+        // $this->middleware(['jwt.auth', 'jwt.refresh']);
     }
 
     /**
@@ -19,7 +23,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+    return response()->json(['result' => 'active'], 200);
     }
 
     /**
@@ -39,16 +43,14 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-
 /***
  -------------------------------------
 | Fetch Specific User Data 
 -------------------------------------
 ***/
+    public function show($id)
+    {
     return view('view test'); 
-
     }
 
     /**
@@ -80,7 +82,38 @@ class UserController extends Controller
 -------------------------------------
 ***/
     public function getUserData() {
-        $user = Auth::user();
-        return response()->json(['data' => $user]);
-    }
+        try {
+            $user = Auth::user();
+            $user = JWTAuth::parseToken()->authenticate();
+            return response()->json(['data' => $user]);
+        } catch (TokenExpiredException $e) {
+            try {
+                // Refresh token
+                $refreshToken = JWTAuth::refresh(JWTAuth::getToken());
+                return response()
+                    ->json(['data' => JWTAuth::setToken($refreshToken)->toUser()])
+                    ->header('Authorization', 'Bearer ' . $refreshToken);
+            } catch (JWTException $e) {
+                // Unauthorized error during refresh
+                return response()->json(['error' => '2nd Unauthorized', 'message' => $e->getMessage()], 401);
+            }
+        } catch (JWTException $e) {
+            // Unauthorized error
+            return response()->json(['error' => '1st Unauthorized', 'message' => $e->getMessage()], 401);
+        }
+    } 
+/***
+ -------------------------------------
+| Logs a signed in user out
+-------------------------------------
+***/
+public function logout() {
+        // fetch authd user & clear tokens
+        // return 'logout works'; 
+        $user = auth()->user();
+        $token = JWTAuth::getToken();
+        JWTAuth::setToken($token)->invalidate();    
+        return response()->json(['message' => 'Successfully logged out']);
+}
+
 }
