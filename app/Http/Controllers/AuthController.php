@@ -41,7 +41,7 @@ class AuthController extends Controller
         ]);
 
         // Set the expiration time to 1 hour (60 minutes)
-        $expirationTime = now()->addMinutes(30);
+        $expirationTime = now()->addMinutes(3000);
 
         // Create a claim for the expiration time
         $customClaims = ['exp' => $expirationTime->timestamp];
@@ -67,7 +67,7 @@ class AuthController extends Controller
         $credentials = $request->only(['email', 'password']);
 
        try {
-            if (! $token = JWTAuth::attempt($credentials, ['exp' => now()->addHours(48)->timestamp])) {
+            if (! $token = JWTAuth::attempt($credentials, ['exp' => now()->addMinutes(3000)->timestamp])) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
         } catch (JWTException $e) {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GradeController;
 use App\Http\Controllers\User;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -23,19 +24,25 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/', function () { return view('welcome'); });
-Route::post('register', [AuthController::class, 'register'])->name('user.register');
-Route::post('login', [AuthController::class, 'login'])->name('user.login');
+Route::post('register', [AuthController::class, 'register'])->name('register');
+Route::post('login', [AuthController::class, 'login'])->name('login');
 
-Route::group(['middleware' => ['api', 'auth:api']], function () {
-    // ['jwt.auth', 'jwt.refresh']
+Route::group(['middleware' => ['jwt.auth','api']], function () {
+
     Route::apiResource('user', UserController::class)->names([
-        'index' => 'user.list',
-        'create' => 'user.create',
-        'store' => 'user.store',
+        'index' => 'users',
+        'create' => 'user.store',
         'edit' => 'user.update',
         'delete' => 'user.delete'
         ]);
 
+    Route::apiResource('grade', GradeController::class)->names([
+        'index' => 'grades',
+        'store' => 'grade.store',
+        'update' => 'grade.update',
+        'delete' => 'grade.delete'
+        ]);
+    
     Route::get('user-data', [UserController::class, 'getUserData']);
     Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 });
