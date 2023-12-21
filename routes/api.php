@@ -19,22 +19,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::get('/', function () { return view('welcome'); });
+
 Route::post('register', [AuthController::class, 'register'])->name('register');
 Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
 Route::group(['middleware' => ['jwt.auth','api']], function () {
 
     Route::apiResource('user', UserController::class)->names([
         'index' => 'users',
-        'create' => 'user.store',
-        'edit' => 'user.update',
-        'delete' => 'user.delete'
-        ]);
+        'store' => 'user.store',
+        'update' => 'user.update',
+        'delete' => 'user.destroy'
+        ])->middleware('admin.check', ['only' => ['store', 'index']]);
 
     Route::apiResource('grade', GradeController::class)->names([
         'index' => 'grades',
@@ -44,6 +42,6 @@ Route::group(['middleware' => ['jwt.auth','api']], function () {
         ]);
     
     Route::get('user-data', [UserController::class, 'getUserData']);
-    Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+    Route::delete('/delete-user', [UserController::class, 'deleteUser'])->middleware('admin.check'); 
 });
 

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class UserController extends Controller
 {
@@ -22,7 +26,12 @@ class UserController extends Controller
      */
     public function index()
     {
-    return response()->json(['result' => 'active'], 200);
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized. Only admins can access this information.'], 403);
+        }
+
+        $users = User::all();
+        return response()->json(['data' => $users], 200);
     }
 
     /**
@@ -33,12 +42,11 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
-            'role' => 'required|not_in:admin', // Ensure role is not 'admin'
+            'role' => 'required|in:student,parent,teacher"',
         ]);
 
         if ($validator->fails()) {
@@ -49,12 +57,12 @@ class UserController extends Controller
         $user = User::create([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
-            'password' => bcrypt($request->input('password')),
+            'password' => Hash::make($request->input('password')),
             'role' => $request->input('role'),
         ]);
 
         return response()->json(['message' => 'User created successfully'], 200);
-    }
+ 
     }
 
     /**
@@ -70,30 +78,37 @@ class UserController extends Controller
 ***/
     public function show($id)
     {
-    return view('view test'); 
+        
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update update a loggedin User
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+    {        
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string',
+                'email' => 'required|email|unique:users,email,' . Auth::id(),
+                'password' => 'nullable|min:6',
+                'role' => 'required|in:admin,parent,teacher',
+            ]);
+        
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 409);
+            }
+        
+            $user = User::find(Auth::user()->id);
+            // Update user information
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');           
+            $user->role = $request->input('role');
+            $user->save(); 
+        
+            return response()->json(['message' => 'User updated successfully'], 200);
     }
     
 /***
@@ -101,28 +116,6 @@ class UserController extends Controller
 | Fetch User Data 
 -------------------------------------
 ***/
-    // public function getUserData() {
-    //     try {
-    //         // $user = Auth::user();
-    //         $user = JWTAuth::parseToken()->authenticate();
-    //         return response()
-    //         ->json(['data' => $user]);
-    //     } catch (TokenExpiredException $e) {
-    //         try {
-    //             // Refresh token
-    //             $refreshToken = JWTAuth::refresh(JWTAuth::getToken());
-    //             return response()
-    //                 ->json(['data' => JWTAuth::setToken($refreshToken)->toUser()])
-    //                 ->header('Authorization', 'Bearer ' . $refreshToken);
-    //         } catch (JWTException $e) {
-    //             // Unauthorized error during refresh
-    //             return response()->json(['error' => '2nd Unauthorized', 'message' => $e->getMessage()], 401);
-    //         }
-    //     } catch (JWTException $e) {
-    //         // Unauthorized error
-    //         return response()->json(['error' => '1st Unauthorized', 'message' => $e->getMessage()], 401);
-    //     }
-    // } 
     public function getUserData()
     {
         try {
@@ -151,7 +144,9 @@ class UserController extends Controller
             // Unauthorized error
             return response()->json(['error' => 'Unauthorized', 'message' => $e->getMessage()], 401);
         }
+
     }
+
 /***
  -------------------------------------
 | Logs a signed in user out
@@ -168,6 +163,39 @@ public function logout() {
         } catch (\Exception $e) {
                 return response()->json(['error' => 'Logout failed'], 500);
         }
+}
+
+/***
+ -------------------------------------
+| Deletes the seleted user account 
+-------------------------------------
+***/
+public  function destroy($id) 
+    {
+    if (Auth::user()->role !== 'admin') {
+        return response()->json(['error' => 'Unauthorized. Only admins can delete accounts.'], 403);
+    }
+    
+    $user = User::find($id);
+    if (!$user) {
+        return response()->json(['error' => 'User not found.'], 404);
+    }
+    
+    if ($user->id === Auth::id()) {
+        return response()->json(['error' => 'Admins cannot delete their own account.'], 403);
+    }
+
+    $user->delete();
+    return response()->json(['message' => 'User deleted successfully'], 200);
+        }
+
+/***
+ -------------------------------------
+| Update the secondary account with the right permission
+-------------------------------------
+***/
+public function updateUser(Request $request) {
+    
 }
 
 }
