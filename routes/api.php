@@ -23,10 +23,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/', function () { return view('welcome'); });
+Route::post('register', [AuthController::class, 'register'])->name('user.register');
+Route::post('login', [AuthController::class, 'login'])->name('user.login');
 
-
-Route::group(['middleware' => ['jwt.auth', 'jwt.refresh']], function () {
-
+Route::group(['middleware' => ['api', 'auth:api']], function () {
+    // ['jwt.auth', 'jwt.refresh']
     Route::apiResource('user', UserController::class)->names([
         'index' => 'user.list',
         'create' => 'user.create',
@@ -36,7 +37,6 @@ Route::group(['middleware' => ['jwt.auth', 'jwt.refresh']], function () {
         ]);
 
     Route::get('user-data', [UserController::class, 'getUserData']);
+    Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 });
 
-Route::post('register', [AuthController::class, 'register'])->name('user.register');
-Route::post('login', [AuthController::class, 'login'])->name('user.login');
