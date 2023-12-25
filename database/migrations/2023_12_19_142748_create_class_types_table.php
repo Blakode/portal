@@ -15,6 +15,8 @@ class CreateClassTypesTable extends Migration
     {
         Schema::create('class_types', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->foreignId('grade_id')->nullable()->constrained('grades')->onDelete('cascade');
             $table->timestamps();
         });
     }

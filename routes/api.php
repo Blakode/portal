@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GradeController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\User;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -40,8 +41,19 @@ Route::group(['middleware' => ['jwt.auth','api']], function () {
         'update' => 'grade.update',
         'delete' => 'grade.delete'
         ]);
-    
+
+    Route::apiResource('student', StudentController::class)->names([
+        'index' => 'students',
+        'store' => 'student.store',
+        'update' => 'student.update',
+        'delete' => 'student.delete'
+        ]);
+
     Route::get('user-data', [UserController::class, 'getUserData']);
+    Route::get('parents-data', [UserController::class, 'getParents']);
+    Route::get('students-parent', [StudentController::class, 'getStudentsForParent']);
+    Route::get('student-parent/{userId}', [StudentController::class, 'getParentStudent']); 
+    Route::get('sync-parent/{parentId}/{studentId}', [StudentController::class, 'syncParent']); 
     Route::delete('/delete-user', [UserController::class, 'deleteUser'])->middleware('admin.check'); 
 });
 

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -46,14 +47,13 @@ class UserController extends Controller
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
-            'role' => 'required|in:student,parent,teacher"',
+            'role' => 'required|in:parent,teacher"',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 409);
         }
 
-        // Create user without checking for the 'admin' role
         $user = User::create([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
@@ -92,7 +92,12 @@ class UserController extends Controller
     {        
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string',
-                'email' => 'required|email|unique:users,email,' . Auth::id(),
+                'email' => [
+                    'required',
+                    'email',
+                    Rule::unique('users')->ignore(Auth::id(), 'id'),
+                    Rule::unique('students')->ignore($id),
+                ],
                 'password' => 'nullable|min:6',
                 'role' => 'required|in:admin,parent,teacher',
             ]);
@@ -102,7 +107,6 @@ class UserController extends Controller
             }
         
             $user = User::find(Auth::user()->id);
-            // Update user information
             $user->name = $request->input('name');
             $user->email = $request->input('email');           
             $user->role = $request->input('role');
@@ -194,8 +198,15 @@ public  function destroy($id)
 | Update the secondary account with the right permission
 -------------------------------------
 ***/
-public function updateUser(Request $request) {
+public function getParents() {
+    $user = Auth::user();
     
-}
+    if ($user->role !== 'admin' && $user->role !== 'teacher') {
+        return response()->json(['error' => 'Unauthorized. Only admins and teachers can access this information.'], 403);
+    }
+
+    $parents = User::where('role', 'parent')->get();
+    return response()->json(['data' => $parents], 200);
+    }
 
 }
