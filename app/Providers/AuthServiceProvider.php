@@ -25,6 +25,23 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+/***
+ -------------------------------------
+| Only user with admin role would use associated method
+-------------------------------------
+***/
+        Gate::define('admin-gate', function ($user) {
+            return $user->role === 'admin';
+        });
+
+/***
+ -------------------------------------
+| Only user with admin & teacher role would use associated method
+-------------------------------------
+***/
+        Gate::define('admin-teacher-gate', function ($user) {
+            return in_array($user->role, ['admin', 'teacher']);
+        });
+    
     }
 }

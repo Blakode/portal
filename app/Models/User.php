@@ -57,13 +57,23 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
-/***
- -------------------------------------
-|associate multiple student to a user (parent)
--------------------------------------
-***/
+    /***
+     -------------------------------------
+    |associate multiple student to a user (parent)
+    -------------------------------------
+    ***/
     public function students()
     {
         return $this->hasMany(Student::class, 'user_id');
+    }
+
+    /***
+     -------------------------------------
+    |many to many relationship between the teacher and the class (class_type)
+    -------------------------------------
+    ***/
+    public function classTypes()
+    {
+    return $this->belongsToMany(ClassType::class, 'class_type_teacher', 'teacher_id', 'class_type_id');
     }
 }

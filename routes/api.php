@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClassTypeController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\User;
@@ -49,11 +50,22 @@ Route::group(['middleware' => ['jwt.auth','api']], function () {
         'delete' => 'student.delete'
         ]);
 
-    Route::get('user-data', [UserController::class, 'getUserData']);
-    Route::get('parents-data', [UserController::class, 'getParents']);
-    Route::get('students-parent', [StudentController::class, 'getStudentsForParent']);
-    Route::get('student-parent/{userId}', [StudentController::class, 'getParentStudent']); 
-    Route::get('sync-parent/{parentId}/{studentId}', [StudentController::class, 'syncParent']); 
-    Route::delete('/delete-user', [UserController::class, 'deleteUser'])->middleware('admin.check'); 
+    Route::apiResource('class', ClassTypeController::class)->names([
+        'index' => 'classes',
+        'show' => 'class.show', 
+        'store' => 'class.store',
+        'update' => 'class.update',
+        'delete' => 'class.delete'
+        ]);
+
+            Route::get('user-data', [UserController::class, 'getUserData']);
+            Route::get('classes', [ClassTypeController::class, 'getClasses']); 
+            Route::get('parents-data', [UserController::class, 'getParents']);
+            Route::get('show-details/{class}', [ClassTypeController::class, 'showDetails']);
+            Route::get('students-parent', [StudentController::class, 'getStudentsForParent']);
+            Route::get('student-parent/{userId}', [StudentController::class, 'getParentStudent']); 
+            Route::get('sync-parent/{parentId}/{studentId}', [StudentController::class, 'syncParent']); 
+            Route::delete('/delete-user', [UserController::class, 'deleteUser'])->middleware('admin.check'); 
+            Route::get('sync-teacher/{teacherId}/{classTypeId}', [ClassTypeController::class, 'syncTeacher']); 
 });
 

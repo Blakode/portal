@@ -19,7 +19,7 @@ class CreateStudentsTable extends Migration
             $table->string('email')->unique()->nullable();
             $table->string('avatar')->nullable(); 
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignId('class_id')->nullable()->constrained('class_types')->onDelete('cascade');
+            $table->foreignId('class_types_id')->nullable()->constrained('class_types')->onDelete('set null');
             $table->string('password');
             $table->timestamps();
         });

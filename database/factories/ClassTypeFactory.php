@@ -14,7 +14,8 @@ class ClassTypeFactory extends Factory
     public function definition()
     {
         return [
-            //
+          'name' => $this->faker->name(),
+          'grade_id' => $this->faker->randomElement([1,2,3,4,5])
         ];
     }
 }

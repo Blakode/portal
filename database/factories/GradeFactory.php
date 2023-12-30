@@ -15,6 +15,7 @@ class GradeFactory extends Factory
     {
         return [
            'name' => $this->faker
+           ->unique()
            ->randomElement(['grade 1', 'grade 2', 'grade 3', 'grade 4', 'grade 5' ]) 
         ];
     }
