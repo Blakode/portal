@@ -16,6 +16,15 @@ class GradeTableSeeder extends Seeder
     public function run()
     {
         DB::table('grade')->trucate();
-        Grade::factory('6')->create(); 
+        $grades = ['grade 1', 'grade 2', 'grade 3', 'grade 4', 'grade 5'];
+
+        // Shuffle the grades to randomize the order
+        shuffle($grades);
+
+        foreach ($grades as $grade) {
+            DB::table('grades')->insert([
+                'grade' => $grade,
+            ]);
+        }
     }
 }

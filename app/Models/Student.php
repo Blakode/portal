@@ -14,6 +14,7 @@ class Student extends Model
         'email',
         'avatar',
         'user_id',
+        'class_types_id', 
         'password'
     ]; 
 
@@ -26,4 +27,15 @@ class Student extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+/***
+ -------------------------------------
+|associate a user(parent) to multiple student
+-------------------------------------
+***/   
+    public function class_type()
+    {
+        return $this->belongsTo(ClassType::class, 'class_types_id');
+    }
+
 }

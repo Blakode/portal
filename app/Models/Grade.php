@@ -12,4 +12,17 @@ class Grade extends Model
     protected $fillable = [
         'name'
     ]; 
+
+
+/***
+ -------------------------------------
+|associate multiple classes to a grade (primary 1)
+-------------------------------------
+***/
+public function class_type()
+{
+    return $this->hasMany(ClassType::class, 'grade_id');
+}
+
+
 }

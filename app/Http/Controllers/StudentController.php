@@ -56,6 +56,7 @@ class StudentController extends Controller
             'email' => $request->input('email'),
             'avatar' => $request->input('avatar'),
             'user_id' => $user ? $user->id : null,
+            'class_types_id' => $request->input('class_types_id'), 
             'password' => Hash::make($request->input('password')),
            
         ]);
@@ -110,7 +111,9 @@ class StudentController extends Controller
             'email' => $request->input('email'),
             'avatar' => $request->input('avatar'),
             'password' => Hash::make($request->input('password')),
-            'user_id' => $request->input('user_id'), 
+            'user_id' => $request->input('user_id'),
+            'class_types_id' => $request->input('class_types_id'),
+
         ]);
 
         return response()->json(['message' => 'Student updated successfully'], 200);
